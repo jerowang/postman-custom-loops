@@ -16,17 +16,17 @@ module.exports = {
 
     pm.environment.set('_IterationCount', 0);
   },
-  markBeginOfLoop: pm => {
+  markStartOfLoop: pm => {
     // Run in the pre-request of the first script inside loop
-    pm.environment.set('_IterationCount', 0);
+    pm.environment.set('__LoopFirstReqName', pm.info.requestId);
   },
-  markEndOfLoop: (pm, envLoopVariableName, firstRequestInLoop) => {
+  markEndOfLoop: (pm, postman) => {
     // Run in the post-request of the final script inside loop
     const i = pm.environment.get('_IterationCount');
-    const d = pm.environment.get(envLoopVariableName);
+    const d = pm.environment.get(pm.environment.get('__LoopVarName'));
 
     if (i !== null && d !== null && i < d.length - 1) {
-      postman.setNextRequest(firstRequestInLoop);
+      postman.setNextRequest(pm.environment.get('__LoopFirstReqName'));
       pm.environment.set('_IterationCount', i + 1);
     } else {
       pm.environment.set('_IterationCount', 0);
@@ -37,8 +37,11 @@ module.exports = {
     pm.environment.set('_IterationCount', 0);
   },
   setupEnvVars: (pm, envLoopVariableName) => {
+    // Place in pre-req of the loop folder
     const i = pm.environment.get('_IterationCount');
-    const d = pm.environment.get(envLoopVariableName);
+    const d = pm.environment.get(`_${envLoopVariableName}`);
+
+    pm.environment.set('__LoopVarName', `_${envLoopVariableName}`);
 
     if (i !== null && d !== null) {
       Object.keys(d[i]).forEach(key => {
@@ -46,9 +49,9 @@ module.exports = {
       });
     }
   },
-  teardownEnvVars: (pm, envLoopVariableName) => {
+  teardownEnvVars: pm => {
     const i = pm.environment.get('_IterationCount');
-    const d = pm.environment.get(envLoopVariableName);
+    const d = pm.environment.get(pm.environment.get('__LoopVarName'));
 
     if (i !== null && d !== null) {
       Object.keys(d[i]).forEach(key => {
