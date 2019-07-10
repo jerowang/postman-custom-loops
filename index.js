@@ -2,14 +2,15 @@ module.exports = {
   setupTestSuite: (pm, arrayOfFields) => {
     // Run this in pre-request of each test suite that requires a loop
     // This only needs to be run once per execution, and it should work (fingers crossed)
-
     if (!pm.environment.get('__SetupRan')) {
       arrayOfFields.forEach(field => {
         let tmp = pm.iterationData.get(field);
-        if (['[', '{'].includes(tmp.substring(0, 1))) {
-          tmp = JSON.parse(tmp);
+        if (tmp) {
+          if (['[', '{'].includes(tmp.substring(0, 1))) {
+            tmp = JSON.parse(tmp);
+          }
+          pm.environment.set(`_${field}`, tmp);
         }
-        pm.environment.set(`_${field}`, tmp);
       });
 
       pm.environment.set('__IterationCount', 0);
@@ -50,6 +51,7 @@ module.exports = {
     }
   },
   teardownEnvVars: pm => {
+    // Run this along with markEndOfLoop to ensure variables are removed
     const i = pm.environment.get('__IterationCount');
     const d = pm.environment.get(pm.environment.get('__LoopVarName'));
 
