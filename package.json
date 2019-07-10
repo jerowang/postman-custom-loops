@@ -1,0 +1,11 @@
+{
+  "name": "postman-custom-loops",
+  "version": "0.0.1",
+  "description": "Custom Postman loops using scripts and the pm object",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Jero Wang",
+  "license": "ISC"
+}
